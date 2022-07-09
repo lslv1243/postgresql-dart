@@ -547,6 +547,7 @@ void main() {
 
     test('Encode Duration', () {
       final pairs = {
+        "interval '3 days'": const Duration(days: 3),
         "interval '2 hours'": const Duration(hours: 2),
         "interval '2 hours, 10 minutes'": const Duration(hours: 2, minutes: 10),
         "interval '2 hours, 15 minutes, 2 seconds'":
