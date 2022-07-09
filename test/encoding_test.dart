@@ -547,16 +547,14 @@ void main() {
 
     test('Encode Duration', () {
       final pairs = {
-        "interval '3 days'": const Duration(days: 3),
-        "interval '2 hours'": const Duration(hours: 2),
-        "interval '2 hours, 10 minutes'": const Duration(hours: 2, minutes: 10),
-        "interval '2 hours, 15 minutes, 2 seconds'":
+        "'3 days'": const Duration(days: 3),
+        "'2 hours'": const Duration(hours: 2),
+        "'2 hours, 10 minutes'": const Duration(hours: 2, minutes: 10),
+        "'2 hours, 15 minutes, 2 seconds'":
             const Duration(hours: 2, minutes: 15, seconds: 2),
-        "interval '2 hours, 2 microseconds'":
-            const Duration(hours: 2, microseconds: 2),
-        "interval '-2 minutes'": const Duration(minutes: -2),
-        "interval '-2 minutes, -3 seconds'":
-            -const Duration(minutes: 2, seconds: 3),
+        "'2 hours, 2 microseconds'": const Duration(hours: 2, microseconds: 2),
+        "'-2 minutes'": const Duration(minutes: -2),
+        "'-2 minutes, -3 seconds'": -const Duration(minutes: 2, seconds: 3),
       };
 
       pairs.forEach((k, v) {

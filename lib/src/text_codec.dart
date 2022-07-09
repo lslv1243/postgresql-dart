@@ -276,6 +276,6 @@ class _DurationParts {
       if (microseconds > 0) '$microseconds microseconds',
     ];
     if (isNegative) parts = parts.map((p) => '-$p');
-    return "interval '${parts.join(', ')}'";
+    return "'${parts.join(', ')}'";
   }
 }
