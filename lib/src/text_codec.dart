@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:postgres/postgres.dart';
 
@@ -158,30 +157,7 @@ class PostgresTextEncoder {
   }
 
   String _encodeDuration(Duration value) {
-    final isNegative = value.isNegative;
-    value = value.abs();
-
-    var lastValue = pow(2, 32) / 2;
-    // when we have a negative number, the limit is higher
-    if (!isNegative) lastValue -= 1;
-
-    String interval;
-    if (value.inMicroseconds <= lastValue) {
-      interval = '${value.inMicroseconds} microseconds';
-    } else if (value.inMilliseconds <= lastValue) {
-      interval = '${value.inMilliseconds} milliseconds';
-    } else if (value.inSeconds <= lastValue) {
-      interval = '${value.inSeconds} seconds';
-    } else if (value.inMinutes <= lastValue) {
-      interval = '${value.inMinutes} minutes';
-    } else if (value.inHours <= lastValue) {
-      interval = '${value.inHours} hours';
-    } else {
-      interval = '${value.inDays} days';
-    }
-    if (isNegative) interval = '-$interval';
-
-    return "interval '$interval'";
+    return _DurationParts.fromDuration(value).forUsageInQuery();
   }
 
   String _encodeJSON(dynamic value, bool escapeStrings) {
@@ -240,5 +216,66 @@ class PostgresTextEncoder {
     }
 
     throw PostgreSQLException("Could not infer array type of value '$value'.");
+  }
+}
+
+class _DurationParts {
+  final int days;
+  final int hours;
+  final int minutes;
+  final int seconds;
+  final int milliseconds;
+  final int microseconds;
+  final bool isNegative;
+
+  _DurationParts({
+    required this.days,
+    required this.hours,
+    required this.minutes,
+    required this.seconds,
+    required this.milliseconds,
+    required this.microseconds,
+    required this.isNegative,
+  });
+
+  factory _DurationParts.fromDuration(Duration duration) {
+    final isNegative = duration.isNegative;
+    duration = duration.abs();
+
+    var microseconds = duration.inMicroseconds;
+
+    final days = microseconds ~/ Duration.microsecondsPerDay;
+    microseconds %= Duration.microsecondsPerDay;
+    final hours = microseconds ~/ Duration.microsecondsPerHour;
+    microseconds %= Duration.microsecondsPerHour;
+    final minutes = microseconds ~/ Duration.microsecondsPerMinute;
+    microseconds %= Duration.microsecondsPerMinute;
+    final seconds = microseconds ~/ Duration.microsecondsPerSecond;
+    microseconds %= Duration.microsecondsPerSecond;
+    final milliseconds = microseconds ~/ Duration.microsecondsPerMillisecond;
+    microseconds %= Duration.microsecondsPerMillisecond;
+
+    return _DurationParts(
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+      milliseconds: milliseconds,
+      microseconds: microseconds,
+      isNegative: isNegative,
+    );
+  }
+
+  String forUsageInQuery() {
+    Iterable<String> parts = [
+      if (days > 0) '$days days',
+      if (hours > 0) '$hours hours',
+      if (minutes > 0) '$minutes minutes',
+      if (seconds > 0) '$seconds seconds',
+      if (milliseconds > 0) '$milliseconds milliseconds',
+      if (microseconds > 0) '$microseconds microseconds',
+    ];
+    if (isNegative) parts = parts.map((p) => '-$p');
+    return "interval '${parts.join(', ')}'";
   }
 }
