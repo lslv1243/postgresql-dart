@@ -545,6 +545,16 @@ void main() {
       });
     });
 
+    test('Encode Duration', () {
+      final pairs = {
+        "interval '1000 microseconds'": const Duration(microseconds: 1000),
+      };
+
+      pairs.forEach((k, v) {
+        expect(encoder.convert(v), k);
+      });
+    });
+
     test('Encode Double', () {
       final pairs = {
         "'nan'": double.nan,

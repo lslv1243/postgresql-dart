@@ -24,6 +24,10 @@ class PostgresTextEncoder {
       return _encodeDateTime(value, isDateOnly: false);
     }
 
+    if (value is Duration) {
+      return _encodeDuration(value);
+    }
+
     if (value is bool) {
       return _encodeBoolean(value);
     }
@@ -150,6 +154,10 @@ class PostgresTextEncoder {
     }
 
     return "'$string'";
+  }
+
+  String _encodeDuration(Duration value) {
+    return "interval '${value.inMicroseconds} microseconds'";
   }
 
   String _encodeJSON(dynamic value, bool escapeStrings) {
