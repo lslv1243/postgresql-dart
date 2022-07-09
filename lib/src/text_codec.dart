@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:postgres/postgres.dart';
 
@@ -157,7 +158,30 @@ class PostgresTextEncoder {
   }
 
   String _encodeDuration(Duration value) {
-    return "interval '${value.inMicroseconds} microseconds'";
+    final isNegative = value.isNegative;
+    value = value.abs();
+
+    var lastValue = pow(2, 32) / 2;
+    // when we have a negative number, the limit is higher
+    if (!isNegative) lastValue -= 1;
+
+    String interval;
+    if (value.inMicroseconds <= lastValue) {
+      interval = '${value.inMicroseconds} microseconds';
+    } else if (value.inMilliseconds <= lastValue) {
+      interval = '${value.inMilliseconds} milliseconds';
+    } else if (value.inSeconds <= lastValue) {
+      interval = '${value.inSeconds} seconds';
+    } else if (value.inMinutes <= lastValue) {
+      interval = '${value.inMinutes} minutes';
+    } else if (value.inHours <= lastValue) {
+      interval = '${value.inHours} hours';
+    } else {
+      interval = '${value.inDays} days';
+    }
+    if (isNegative) interval = '-$interval';
+
+    return "interval '$interval'";
   }
 
   String _encodeJSON(dynamic value, bool escapeStrings) {

@@ -547,7 +547,14 @@ void main() {
 
     test('Encode Duration', () {
       final pairs = {
-        "interval '1000 microseconds'": const Duration(microseconds: 1000),
+        "interval '2147483647 microseconds'":
+            const Duration(microseconds: 2147483647),
+        "interval '2147483 milliseconds'":
+            const Duration(microseconds: 2147483648),
+        "interval '-2147483648 microseconds'":
+            const Duration(microseconds: -2147483648),
+        "interval '-2147483 milliseconds'":
+            const Duration(microseconds: -2147483649),
       };
 
       pairs.forEach((k, v) {
